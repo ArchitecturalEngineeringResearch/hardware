@@ -1,6 +1,9 @@
+#include <TinyGPS++.h>
 #include <SoftwareSerial.h>
+
 SoftwareSerial softSerial(9, 8);//自定义软串口 RX TX
 SoftwareSerial gpsSerial(10, 11);//自定义软串口 RX TX
+TinyGPSPlus gps;
 
 void setup() {
   Serial.begin(9600);
@@ -55,14 +58,13 @@ void loop() {
 String getGPSInfo () {
   delay(1000);
   String data;
-  while (gpsSerial.available()) {
+  while (gpsSerial.available() > 0) {
     // 每次读取一个字符
-    char c = gpsSerial.read();
-
-    if (c == '\n') {
-      c = 45;
+    if (gps.encode(gpsSerial.read()) || gps.location.isValid()) {
+      // 经度,纬度,卫星数,速度,海拔
+      
+      data = String(gps.location.lat()) + "," + String(gps.location.lng()) + "," + String(gps.satellites.value()) + "," +  String(gps.speed.kmph()) + "" + String(gps.altitude.meters()) + "," +  String(gps.course.value());
     }
-    data += c;
   }
 
   return data;
